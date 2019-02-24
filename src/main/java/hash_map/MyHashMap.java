@@ -8,13 +8,15 @@ import java.util.Set;
 
 public class MyHashMap<K, V> implements Map<K, V> {
     private static final int BASIC_CAPACITY = 16;
+    private static int currentCapacity;
 
     private int currentSize;
 
     private Node<K, V>[] hashArray;
 
-    public MyHashMap(){
-        hashArray = new Node[BASIC_CAPACITY];
+    public MyHashMap() {
+        currentCapacity = BASIC_CAPACITY;
+        hashArray = new Node[currentCapacity];
     }
 
 
@@ -35,14 +37,62 @@ public class MyHashMap<K, V> implements Map<K, V> {
     }
 
     public V get(Object key) {
+        if (isEmpty()) return null;
+
+        int hash_1 = getHash_1(key);
+        int hash_2 = getHash_2(key);
+        int resultHash = (hash_1) % currentCapacity;
+        Node<K, V> arrayCell = hashArray[resultHash];
+
+        if (arrayCell == null) {
+            System.err.println("No elem for the key in hashMap");
+            return null;
+        }
+        for (int i = 1; i < currentCapacity; i++) {
+            resultHash = (hash_1 + i * hash_2) % currentCapacity;
+            arrayCell = hashArray[resultHash];
+            if (key.equals(arrayCell.key) && !arrayCell.wasDeleted) return arrayCell.value;
+        }
         return null;
     }
 
     public V put(K key, V value) {
+        int hash_1 = getHash_1(key);
+        int hash_2 = getHash_2(key);
+        int resultHash;
+        Node<K, V> arrayCell;
+
+        for (int i = 0; i < currentCapacity; i++) {
+            resultHash = (hash_1 + i * hash_2) % currentCapacity;
+            arrayCell = hashArray[resultHash];
+            if (arrayCell == null || arrayCell.wasDeleted) {
+                hashArray[resultHash] = new Node<K, V>(resultHash, key, value, false);
+                currentSize++;
+                break;
+            }
+        }
+//todo
         return null;
     }
 
     public V remove(Object key) {
+        if (isEmpty()) return null;
+
+        int hash_1 = getHash_1(key);
+        int hash_2 = getHash_2(key);
+        int resultHash;
+        Node<K, V> arrayCell;
+
+        for (int i = 0; i < currentCapacity; i++) {
+            resultHash = (hash_1 + i * hash_2) % currentCapacity;
+            arrayCell = hashArray[resultHash];
+            if (arrayCell != null && key.equals(arrayCell.key)) {
+                arrayCell.wasDeleted = true;
+                currentSize--;
+                return arrayCell.value;
+            }
+        }
+        System.err.println("No elem for the key in HashMap");
         return null;
     }
 
@@ -66,15 +116,29 @@ public class MyHashMap<K, V> implements Map<K, V> {
         return null;
     }
 
+    private int getHash_1(Object key) {
+        return key != null ? key.hashCode() : 0;
+    }
+
+    private int getHash_2(Object key) {
+        return 1 + key.hashCode() % (currentCapacity - 3);
+    }
+
+    private boolean isFull() {
+        return currentSize == currentCapacity;
+    }
+
     private static class Node<K, V> {
         private int hash;
         private K key;
         private V value;
+        private boolean wasDeleted;
 
-        private Node(int hash, K key, V value){
+        private Node(int hash, K key, V value, boolean wasDeleted) {
             this.hash = hash;
             this.key = key;
             this.value = value;
+            this.wasDeleted = wasDeleted;
         }
     }
 }
