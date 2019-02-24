@@ -1,24 +1,28 @@
 package hash_map;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
-
 //todo: make KEY to int; make VALUE to long
 
-public class MyHashMap<K, V> implements Map<K, V> {
+public class MyHashMap<K, V> {
     private static final int BASIC_CAPACITY = 16;
-    private static int currentCapacity;
-
+    private static final int MAX_CAPACITY = Integer.MAX_VALUE / 2;
+    private int currentCapacity;
     private int currentSize;
 
     private Node<K, V>[] hashArray;
 
     public MyHashMap() {
-        currentCapacity = BASIC_CAPACITY;
-        hashArray = new Node[currentCapacity];
+        this.currentCapacity = BASIC_CAPACITY;
+        this.hashArray = new Node[currentCapacity];
     }
 
+    public MyHashMap(int currentCapacity) {
+        if (currentCapacity > MAX_CAPACITY || currentCapacity < BASIC_CAPACITY) {
+            this.currentCapacity = BASIC_CAPACITY;
+        } else {
+            this.currentCapacity = currentCapacity;
+        }
+        hashArray = new Node[currentCapacity];
+    }
 
     public int size() {
         return currentSize;
@@ -26,14 +30,6 @@ public class MyHashMap<K, V> implements Map<K, V> {
 
     public boolean isEmpty() {
         return currentSize == 0;
-    }
-
-    public boolean containsKey(Object key) {
-        return false;
-    }
-
-    public boolean containsValue(Object value) {
-        return false;
     }
 
     public V get(Object key) {
@@ -57,6 +53,10 @@ public class MyHashMap<K, V> implements Map<K, V> {
     }
 
     public V put(K key, V value) {
+        if (isFull()) {
+            System.err.println("HashMap is full");
+            return null;
+        }
         int hash_1 = getHash_1(key);
         int hash_2 = getHash_2(key);
         int resultHash;
@@ -71,7 +71,6 @@ public class MyHashMap<K, V> implements Map<K, V> {
                 break;
             }
         }
-//todo
         return null;
     }
 
@@ -93,26 +92,6 @@ public class MyHashMap<K, V> implements Map<K, V> {
             }
         }
         System.err.println("No elem for the key in HashMap");
-        return null;
-    }
-
-    public void putAll(Map<? extends K, ? extends V> m) {
-
-    }
-
-    public void clear() {
-
-    }
-
-    public Set<K> keySet() {
-        return null;
-    }
-
-    public Collection<V> values() {
-        return null;
-    }
-
-    public Set<Entry<K, V>> entrySet() {
         return null;
     }
 
