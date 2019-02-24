@@ -3,18 +3,27 @@ package hash_map;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
-//import ;
-//import ;
 
-public class MyHashMap <K, V> implements Map <K, V> {
+//todo: make KEY to int; make VALUE to long
+
+public class MyHashMap<K, V> implements Map<K, V> {
+    private static final int BASIC_CAPACITY = 16;
+
+    private int currentSize;
+
+    private Node<K, V>[] hashArray;
+
+    public MyHashMap(){
+        hashArray = new Node[BASIC_CAPACITY];
+    }
 
 
     public int size() {
-        return 0;
+        return currentSize;
     }
 
     public boolean isEmpty() {
-        return false;
+        return currentSize == 0;
     }
 
     public boolean containsKey(Object key) {
@@ -55,5 +64,17 @@ public class MyHashMap <K, V> implements Map <K, V> {
 
     public Set<Entry<K, V>> entrySet() {
         return null;
+    }
+
+    private static class Node<K, V> {
+        private int hash;
+        private K key;
+        private V value;
+
+        private Node(int hash, K key, V value){
+            this.hash = hash;
+            this.key = key;
+            this.value = value;
+        }
     }
 }
