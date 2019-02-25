@@ -1,14 +1,12 @@
 package hash_map;
 
-//todo: make KEY to int; make VALUE to long
-
-public class MyHashMap<K, V> {
+public class MyHashMap<Integer, Double> {
     private static final int BASIC_CAPACITY = 16;
-    private static final int MAX_CAPACITY = Integer.MAX_VALUE / 2;
+    private static final int MAX_CAPACITY = java.lang.Integer.MAX_VALUE / 2;
     private int currentCapacity;
     private int currentSize;
 
-    private Node<K, V>[] hashArray;
+    private Node[] hashArray;
 
     public MyHashMap() {
         this.currentCapacity = BASIC_CAPACITY;
@@ -21,7 +19,7 @@ public class MyHashMap<K, V> {
         } else {
             this.currentCapacity = currentCapacity;
         }
-        hashArray = new Node[currentCapacity];
+        hashArray = new Node[this.currentCapacity];
     }
 
     public int size() {
@@ -32,18 +30,22 @@ public class MyHashMap<K, V> {
         return currentSize == 0;
     }
 
-    public V get(Object key) {
+    public Double get(Integer key) {
         if (isEmpty()) return null;
+        if (key == null) return getFirstNode();
 
         int hash_1 = getHash_1(key);
         int hash_2 = getHash_2(key);
+
         int resultHash = (hash_1) % currentCapacity;
-        Node<K, V> arrayCell = hashArray[resultHash];
+        Node<Integer, Double> arrayCell = hashArray[resultHash];
 
         if (arrayCell == null) {
             System.err.println("No elem for the key in hashMap");
             return null;
         }
+        if ((key.equals(arrayCell.key)) && !arrayCell.wasDeleted) return arrayCell.value;
+
         for (int i = 1; i < currentCapacity; i++) {
             resultHash = (hash_1 + i * hash_2) % currentCapacity;
             arrayCell = hashArray[resultHash];
@@ -52,21 +54,27 @@ public class MyHashMap<K, V> {
         return null;
     }
 
-    public V put(K key, V value) {
+    private Double getFirstNode() {
+        Node<Integer, Double> arrayCell = hashArray[0];
+        return arrayCell.value;
+    }
+
+    public Double put(Integer key, Double value) {
         if (isFull()) {
-            System.err.println("HashMap is full");
-            return null;
+            System.err.println("HashMap is Full");
+            return value;
         }
+
         int hash_1 = getHash_1(key);
         int hash_2 = getHash_2(key);
         int resultHash;
-        Node<K, V> arrayCell;
+        Node<Integer, Double> arrayCell;
 
         for (int i = 0; i < currentCapacity; i++) {
             resultHash = (hash_1 + i * hash_2) % currentCapacity;
             arrayCell = hashArray[resultHash];
             if (arrayCell == null || arrayCell.wasDeleted) {
-                hashArray[resultHash] = new Node<K, V>(resultHash, key, value, false);
+                hashArray[resultHash] = new Node<Integer, Double>(key, value, false);
                 currentSize++;
                 break;
             }
@@ -74,18 +82,19 @@ public class MyHashMap<K, V> {
         return null;
     }
 
-    public V remove(Object key) {
+    public Double remove(Integer key) {
         if (isEmpty()) return null;
+        if (key == null) return removeFirstNode();
 
         int hash_1 = getHash_1(key);
         int hash_2 = getHash_2(key);
         int resultHash;
-        Node<K, V> arrayCell;
+        Node<Integer, Double> arrayCell;
 
         for (int i = 0; i < currentCapacity; i++) {
             resultHash = (hash_1 + i * hash_2) % currentCapacity;
             arrayCell = hashArray[resultHash];
-            if (arrayCell != null && key.equals(arrayCell.key)) {
+            if (arrayCell != null && !arrayCell.wasDeleted && key.equals(arrayCell.key)) {
                 arrayCell.wasDeleted = true;
                 currentSize--;
                 return arrayCell.value;
@@ -95,26 +104,33 @@ public class MyHashMap<K, V> {
         return null;
     }
 
-    private int getHash_1(Object key) {
+    private Double removeFirstNode() {
+        Node<Integer, Double> arrayCell = hashArray[0];
+        arrayCell.wasDeleted = true;
+        currentSize--;
+        return arrayCell.value;
+    }
+
+    private int getHash_1(Integer key) {
         return key != null ? key.hashCode() : 0;
     }
 
-    private int getHash_2(Object key) {
-        return 1 + key.hashCode() % (currentCapacity - 3);
+    private int getHash_2(Integer key) {
+        int value = getHash_1(key) % (currentCapacity - 4);
+        if (value % 2 == 0) return value + 1;
+        return value;
     }
 
     private boolean isFull() {
         return currentSize == currentCapacity;
     }
 
-    private static class Node<K, V> {
-        private int hash;
-        private K key;
-        private V value;
+    private static class Node<Integer, Double> {
+        private Integer key;
+        private Double value;
         private boolean wasDeleted;
 
-        private Node(int hash, K key, V value, boolean wasDeleted) {
-            this.hash = hash;
+        private Node(Integer key, Double value, boolean wasDeleted) {
             this.key = key;
             this.value = value;
             this.wasDeleted = wasDeleted;
